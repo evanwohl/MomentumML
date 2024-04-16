@@ -8,7 +8,6 @@ from sklearn.preprocessing import StandardScaler
 import pickle
 from sklearn.ensemble import GradientBoostingRegressor
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import SGD
 from sklearn.ensemble import RandomForestRegressor
 import seaborn as sns
 def load_csv(file_path):
@@ -83,7 +82,7 @@ def create_model(input_shape):
     model.add(BatchNormalization())
     model.add(Dropout(0.2))
     model.add(Dense(1, activation='linear'))
-    model.compile(optimizer=SGD(), loss='mean_squared_error')
+    model.compile(optimizer='adam', loss='mean_squared_error')
     return model
 
 
@@ -211,20 +210,12 @@ def build_lstm_model(df):
     imputer = SimpleImputer(strategy='mean')
     X_train_imputed = imputer.fit_transform(X_train)
     X_test_imputed = imputer.transform(X_test)
-
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_imputed)
     X_test_scaled = scaler.transform(X_test_imputed)
     X_train_selected = X_train_scaled.reshape((X_train_scaled.shape[0], 1, X_train_scaled.shape[1]))
     X_test_selected = X_test_scaled.reshape((X_test_scaled.shape[0], 1, X_test_scaled.shape[1]))
-    model = Sequential()
-    model.add(LSTM(100, return_sequences=True, input_shape=X_train_selected.shape[1:]))
-    model.add(Dropout(0.2))
-    model.add(LSTM(50, return_sequences=True))
-    model.add(Dropout(0.2))
-    model.add(LSTM(25, return_sequences=False))
-    model.add(Dropout(0.2))
-    model.add(Dense(1))
+    model = create_model(X_train_selected.shape[1:])
     model.compile(optimizer='adam', loss='mse')
     model.fit(X_train_selected, y_train, epochs=50, batch_size=32, verbose=1)
     loss = model.evaluate(X_test_selected, y_test, verbose=0)
@@ -244,7 +235,6 @@ def build_gradient_boosting_model(df):
     imputer = SimpleImputer(strategy='mean')
     X_train_imputed = imputer.fit_transform(X_train)
     X_test_imputed = imputer.transform(X_test)
-
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_imputed)
     X_test_scaled = scaler.transform(X_test_imputed)
@@ -301,6 +291,7 @@ if __name__ == '__main__':
     data = pd.concat(data)
     print(data)
     model, X_test, y_test = build_model(data)
+    # uncomment the following if using LSTM nn
     '''
     loss = model.evaluate(X_test, y_test, verbose=0)
     print(f'Test loss: {loss}')
