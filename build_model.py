@@ -1,16 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
-from sklearn.impute import SimpleImputer
-from tensorflow.keras.layers import LSTM, Dropout, Dense
-from tensorflow.keras.models import Sequential
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from tensorflow.keras.layers import LSTM, Dropout, Dense, BatchNormalization
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import SelectKBest, f_regression
 import pickle
-
+from sklearn.ensemble import GradientBoostingRegressor
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import SGD
+from sklearn.ensemble import RandomForestRegressor
+import seaborn as sns
 def load_csv(file_path):
     """
     Load a CSV file into a pandas dataframe
@@ -61,9 +61,7 @@ def calculate_rsi(df, period=2):
     df['RSI'] = 100 - (100 / (1 + rs))
     return df
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten
+
 def create_model(input_shape):
     model = Sequential()
     model.add(LSTM(1000, return_sequences=True, input_shape=input_shape))
@@ -88,7 +86,6 @@ def create_model(input_shape):
     model.compile(optimizer=SGD(), loss='mean_squared_error')
     return model
 
-from sklearn.ensemble import RandomForestRegressor
 
 def create_random_forest_model(X_train, y_train, X_test, y_test):
     """
@@ -99,7 +96,7 @@ def create_random_forest_model(X_train, y_train, X_test, y_test):
     :param y_test: a pandas series with the target variable
     :return: a trained Random Forest model
     """
-    model = RandomForestRegressor(n_estimators=700)
+    model = RandomForestRegressor(n_estimators=1000)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
@@ -114,10 +111,12 @@ def backtest_strategy(df, magnitude):
     :return: a number representing the final capital after backtesting the strategy
     """
     df['Date'] = pd.to_datetime(df['Date'])
-    df = df[(df['Date'].dt.year > 2014)]
+    df = df[(df['Date'].dt.year > 2008)]
     df = df.sort_values(by='Date')
     capital = 10000
     value = [10000]
+    wins = []
+    losses = []
     for date, group in df.groupby('Date'):
         num_trades = len(group[abs(group['Predicted']) > magnitude])
         if num_trades == 0:
@@ -130,23 +129,20 @@ def backtest_strategy(df, magnitude):
                 print(f"Date: {date}, Position: {position}, Profit: {profit}")
                 capital += profit
                 value.append(capital)
+                wins.append(profit) if profit > 0 else losses.append(profit)
+    print(f"Average win: {sum(wins) / len(wins)}")
+    print(f"Average loss: {sum(losses) / len(losses)}")
+    print("Win Loss Ratio: ", len(wins) / len(losses))
+    print(f"Max Drawdown: {max([((value[i] - max(value[:i])) / max(value[:i])) for i in range(1, len(value))])}")
     return capital, value
-def build_model(df):
-    """
-    Build a Random Forest model to predict the change in stock price
-    :param df: a pandas dataframe with columns for technical indicators and the target variable 'Change'
-    :return: a trained Random Forest model, the test data, and the test target variable
-    """
-    df = df.dropna(subset=['Change'])
-    X = df.drop(['Change', 'Date'], axis=1)
-    y = df['Change']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=105, shuffle=False)
-    model = create_random_forest_model(X_train, y_train, X_test, y_test)
-    y_pred = model.predict(X_test)
-    df_actual_vs_predicted = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
-    df_actual_vs_predicted['Date'] = df['Date'].iloc[-len(y_test):].values
 
-    magnitude = 1.3
+def print_results(df_actual_vs_predicted, magnitude):
+    """
+    Print the results of the model's predictions
+    :param df_actual_vs_predicted: a pandas dataframe with columns for the actual and predicted values
+    :param magnitude: a number representing the magnitude of the predicted change to trade on
+    :return: none
+    """
     print(f"Predicted magnitude greater than {str(magnitude)}. Number of times: ",
           len(df_actual_vs_predicted[abs(df_actual_vs_predicted['Predicted']) > magnitude]))
     print(df_actual_vs_predicted[abs(df_actual_vs_predicted['Predicted']) > magnitude].to_string())
@@ -173,16 +169,29 @@ def build_model(df):
     plt.grid(True)
     plt.show()
     print(f"Backtest result: ${backtest_result} profit with magnitude {(magnitude)}")
-    import seaborn as sns
     df_actual_vs_predicted['Difference'] = df_actual_vs_predicted['Actual'] - df_actual_vs_predicted['Predicted']
-
     sns.distplot(df_actual_vs_predicted['Difference'], bins=1000, kde=True)
-
     plt.title('Distribution of Differences between Actual and Predicted Values')
     plt.xlabel('Difference')
     plt.ylabel('Density')
-
     plt.show()
+
+def build_model(df):
+    """
+    Build a Random Forest model to predict the change in stock price
+    :param df: a pandas dataframe with columns for technical indicators and the target variable 'Change'
+    :return: a trained Random Forest model, the test data, and the test target variable
+    """
+    df = df.dropna(subset=['Change'])
+    X = df.drop(['Change', 'Date'], axis=1)
+    y = df['Change']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=105, shuffle=False)
+    model = create_random_forest_model(X_train, y_train, X_test, y_test)
+    y_pred = model.predict(X_test)
+    df_actual_vs_predicted = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
+    df_actual_vs_predicted['Date'] = df['Date'].iloc[-len(y_test):].values
+    magnitude = 1.3
+    print_results(df_actual_vs_predicted, magnitude)
     with open('model.pkl', 'wb') as file:
         pickle.dump(model, file)
     return model, X_test, y_test
@@ -222,7 +231,6 @@ def build_lstm_model(df):
     print(f'Test loss: {loss}')
     return model, X_test_selected, y_test
 
-from sklearn.ensemble import GradientBoostingRegressor
 
 def build_gradient_boosting_model(df):
     """
