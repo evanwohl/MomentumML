@@ -62,6 +62,11 @@ def calculate_rsi(df, period=2):
 
 
 def create_model(input_shape):
+    """
+    Create an LSTM model
+    :param input_shape: a tuple representing the input shape of the model
+    :return: a compiled LSTM model
+    """
     model = Sequential()
     model.add(LSTM(1000, return_sequences=True, input_shape=input_shape))
     model.add(BatchNormalization())
@@ -216,10 +221,9 @@ def build_lstm_model(df):
     X_train_selected = X_train_scaled.reshape((X_train_scaled.shape[0], 1, X_train_scaled.shape[1]))
     X_test_selected = X_test_scaled.reshape((X_test_scaled.shape[0], 1, X_test_scaled.shape[1]))
     model = create_model(X_train_selected.shape[1:])
-    model.compile(optimizer='adam', loss='mse')
     model.fit(X_train_selected, y_train, epochs=50, batch_size=32, verbose=1)
     loss = model.evaluate(X_test_selected, y_test, verbose=0)
-    print(f'Test loss: {loss}')
+    print(f'Test loss(MSE): {loss}')
     return model, X_test_selected, y_test
 
 
