@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from tensorflow.keras.layers import LSTM, Dropout, Dense, BatchNormalization
@@ -90,11 +90,13 @@ def create_random_forest_model(X_train, y_train, X_test, y_test):
     :param y_test: a pandas series with the target variable
     :return: a trained Random Forest model
     """
-    model = RandomForestRegressor(n_estimators=1000)
+    model = RandomForestRegressor(n_estimators=500)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
     print(f"Mean Squared Error: {mse}")
+    print(f"Mean Absolute Error: {mae}")
     return model
 
 def backtest_strategy(df, magnitude):
@@ -105,7 +107,7 @@ def backtest_strategy(df, magnitude):
     :return: a number representing the final capital after backtesting the strategy
     """
     df['Date'] = pd.to_datetime(df['Date'])
-    df = df[(df['Date'].dt.year > 2008)]
+    df = df[(df['Date'].dt.year > 2014)]
     df = df.sort_values(by='Date')
     capital = 10000
     value = [10000]
@@ -117,8 +119,8 @@ def backtest_strategy(df, magnitude):
             continue
         capital_per_trade = capital / num_trades
         for i in range(len(group)):
-            if (group.iloc[i]['Predicted']) > magnitude:
-                position = capital_per_trade if group.iloc[i]['Predicted'] > 0 else -(capital_per_trade / 2)
+            if abs(group.iloc[i]['Predicted']) > magnitude:
+                position = capital_per_trade if group.iloc[i]['Predicted'] > 0 else -(capital_per_trade / 1.5)
                 profit = position * (group.iloc[i]['Actual'] / 100)
                 print(f"Date: {date}, Position: {position}, Profit: {profit}")
                 capital += profit
@@ -130,6 +132,65 @@ def backtest_strategy(df, magnitude):
     print(f"Max Drawdown: {max([((value[i] - max(value[:i])) / max(value[:i])) for i in range(1, len(value))])}")
     return capital, value
 
+def plot_value_series(lst):
+    """
+    Plot a list of values
+    :param lst: a list of numbers
+    :return: none
+    """
+    plt.plot(lst)
+    plt.title('Portfolio Value Over Time')
+    plt.xlabel('Number of Trades')
+    plt.ylabel('Portfolio Value')
+    plt.grid(True)
+    plt.show()
+
+
+def plot_distribution(df):
+    """
+    Plot the distribution of the difference between the actual and predicted values
+    :param df: a pandas dataframe with columns for the actual and predicted values
+    :return: none
+    """
+
+    df['Difference'] = df['Actual'] - df['Predicted']
+    df = df[(df['Difference'] > df['Difference'].quantile(0.05)) & (df['Difference'] < df['Difference'].quantile(0.95))]
+    plt.figure(figsize=(10, 6))
+    sns.set_style("whitegrid")
+    sns.set_palette("pastel")
+    sns.distplot(df['Difference'], bins=100, kde=True)
+    plt.title('Distribution of Differences between Actual and Predicted Values', fontsize=15)
+    plt.xlabel('Difference', fontsize=12)
+    plt.ylabel('Density', fontsize=12)
+    plt.show()
+
+def plot_actual_vs_predicted(df):
+    """
+    Plot the actual vs predicted values
+    :param df: a pandas dataframe with columns for the actual and predicted values
+    :return: none
+    """
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['Actual'], label='Actual')
+    plt.plot(df['Predicted'], label='Predicted')
+    plt.title('Actual vs Predicted Values', fontsize=15)
+    plt.xlabel('Index', fontsize=12)
+    plt.ylabel('Value', fontsize=12)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+def plot_heatmap(df):
+    """
+    Plot a heatmap of the correlation matrix of a dataframe
+    :param df: a pandas dataframe
+    :return: none
+    """
+    corr = df.corr()
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
+    plt.title('Heatmap of Correlation Matrix')
+    plt.show()
 def print_results(df_actual_vs_predicted, magnitude):
     """
     Print the results of the model's predictions
@@ -157,18 +218,11 @@ def print_results(df_actual_vs_predicted, magnitude):
         df_actual_vs_predicted[abs(df_actual_vs_predicted['Predicted']) > abs(df_actual_vs_predicted['Actual'])]))
     print(f"Number of times the model predicted the correct sign of the change: {len(df_actual_vs_predicted[df_actual_vs_predicted['Predicted'] * df_actual_vs_predicted['Actual'] > 0])}")
     backtest_result, portfolio_value = backtest_strategy(df_actual_vs_predicted, magnitude)
-    plt.plot(portfolio_value)
-    plt.title('Backtest Results Since 2015 with a 70/30 Train/Test Split')
-    plt.xlabel('# Of Trades')
-    plt.grid(True)
-    plt.show()
+    plot_value_series(portfolio_value)
     print(f"Backtest result: ${backtest_result} profit with magnitude {(magnitude)}")
-    df_actual_vs_predicted['Difference'] = df_actual_vs_predicted['Actual'] - df_actual_vs_predicted['Predicted']
-    sns.distplot(df_actual_vs_predicted['Difference'], bins=1000, kde=True)
-    plt.title('Distribution of Differences between Actual and Predicted Values')
-    plt.xlabel('Difference')
-    plt.ylabel('Density')
-    plt.show()
+    plot_distribution(df_actual_vs_predicted)
+    plot_actual_vs_predicted(df_actual_vs_predicted)
+    plot_heatmap(df_actual_vs_predicted)
 
 def build_model(df):
     """
@@ -177,7 +231,10 @@ def build_model(df):
     :return: a trained Random Forest model, the test data, and the test target variable
     """
     df = df.dropna(subset=['Change'])
-    X = df.drop(['Change', 'Date'], axis=1)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df[(df['Date'].dt.year > 2009)]
+    print(df)
+    X = df.drop(['Change', 'Date', 'Price'], axis=1)
     y = df['Change']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=105, shuffle=False)
     model = create_random_forest_model(X_train, y_train, X_test, y_test)
@@ -188,9 +245,7 @@ def build_model(df):
     print_results(df_actual_vs_predicted, magnitude)
     with open('model.pkl', 'wb') as file:
         pickle.dump(model, file)
-    return model, X_test, y_test
-
-
+    return model, X_test, y_test\
 
 
 def build_lstm_model(df):
