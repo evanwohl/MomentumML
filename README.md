@@ -5,6 +5,8 @@ decided to create a random forest regression model and created/backtested a trad
 
 **Model Mean Absolute Error: 1.4749345441781025**
 
+The model's predictions are, on average, off by 1.47%.
+
 The following plot depicts the portfolio value resulting from backtesting the built in strategy, with training data starting in 2010 and test data starting in 2014 with a set magnitude of 1.3. (It is important to keep in mind that the test split contains only 30% of the total data, so it is hard to compute a number for alpha, sharpe ratio, etc.). 
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/d66c024f-a1e3-4991-a367-daf22ab5e6bf)
 
