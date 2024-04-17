@@ -17,3 +17,14 @@ The following plot depicts the portfolio value resulting from backtesting the bu
 **Win Loss Ratio:  1.1132075471698113**
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/eed62714-6d34-48f1-8e36-2bab0d957eab)
 
+**Usage**
+
+Ensure that all required dependencies are installed in your virtual enviroment.
+
+Set the following variables to the desired values in the **if name == '__main___'** conditional:
+
+**date_to_train_from = 2010**
+
+**date_to_test_from = 2015**
+
+Directly under the initialization of these variables, replace the values inside the list that is being iterated over with the location to the csv files of your data. It should have two columns, one for the date and one for the close price (called Date and Price respecitvely). 
