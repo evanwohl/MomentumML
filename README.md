@@ -30,7 +30,12 @@ Below are the visualizations of the portfolio values resulting from the backtest
 ![Portfolio Value Plot](https://github.com/evanwohl/MomentumML/assets/156111794/d66c024f-a1e3-4991-a367-daf22ab5e6bf)
 
 
-## Installation
-Ensure that all required dependencies are installed in your Python virtual environment. You can install dependencies via the following command:
-```bash
-pip install -r requirements.txt
+## Usage
+Ensure that all required dependencies are installed in your Python virtual environment.
+
+- Set the following variables to the desired values in the **if name == '__main___'** conditional:
+
+    **date_to_train_from = 2010**
+    **date_to_test_from = 2015**
+- Directly under the initialization of these variables, replace the values inside the list that is being iterated over with the location to the csv files of your data. It should have two columns, one for the date and one for the close price (Date, and Price respecitvely)
+- Run **build_model.py**
