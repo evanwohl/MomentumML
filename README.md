@@ -11,6 +11,7 @@ This repository contains a machine learning model using random forest regression
 - **Data Split**: 70% training, 30% testing
 
 ## Model Performance
+(39938 rows of data used for training)
 - **Mean Squared Error**: 5.269296510425714
 - **Mean Absolute Error**: 1.4749345441781025
 - **Average Prediction Error**: 1.47%
