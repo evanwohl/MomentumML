@@ -1,29 +1,36 @@
-Machine learning model to predict day over day change in close price of various different securities. A random forest regression model was trained over a dataset containing momentum indicatores for 17 seucurities, and a trading strategy was created/backtested based on the results produced. 
+# MomentumML: Security Price Prediction Model
 
-**Model Mean Squared Error: 5.269296510425714**
+## Overview
+This repository contains a machine learning model using random forest regression to predict the day-over-day change in the closing price of various securities. The model utilizes momentum indicators for 17 securities, and a trading strategy has been developed and backtested based on the model's predictions.
 
-**Model Mean Absolute Error: 1.4749345441781025**
+## Model Description
+- **Algorithm**: Random Forest Regression
+- **Dataset**: Includes momentum indicators for 17 securities.
+- **Training Period**: Starts in 2010
+- **Testing Period**: Starts in 2014
+- **Data Split**: 70% training, 30% testing
 
-**The model's predictions are, on average, off by 1.47%.**
+## Model Performance
+- **Mean Squared Error**: 5.269296510425714
+- **Mean Absolute Error**: 1.4749345441781025
+- **Average Prediction Error**: 1.47%
 
-The following plot depicts the portfolio value resulting from backtesting the built in strategy, with training data starting in 2010 and test data starting in 2014 with a set magnitude of 1.3. (It is important to keep in mind that the test split contains only 30% of the total data, so it is hard to compute a number for alpha, sharpe ratio, etc.). 
-![image](https://github.com/evanwohl/MomentumML/assets/156111794/d66c024f-a1e3-4991-a367-daf22ab5e6bf)
-
-**Average win: 225.8955038527688**
-
-**Average loss: -196.80185718120578**
-
-**Win Loss Ratio:  1.1132075471698113**
+## Actual % Change in Price vs Predicted % Change in Price
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/eed62714-6d34-48f1-8e36-2bab0d957eab)
 
-**Usage**
+## Strategy Backtest Results
+The following metrics were obtained through backtesting the built-in trading strategy:
+- **Average Win**: $225.90
+- **Average Loss**: -$196.80
+- **Win/Loss Ratio**: 1.113
 
-Ensure that all required dependencies are installed in your virtual enviroment.
+## Portfolio Valuation Plot
+Below are the visualizations of the portfolio values resulting from the backtested trading strategy:
 
-Set the following variables to the desired values in the **if name == '__main___'** conditional:
+![Portfolio Value Plot](https://github.com/evanwohl/MomentumML/assets/156111794/d66c024f-a1e3-4991-a367-daf22ab5e6bf)
 
-**date_to_train_from = 2010**
 
-**date_to_test_from = 2015**
-
-Directly under the initialization of these variables, replace the values inside the list that is being iterated over with the location to the csv files of your data. It should have two columns, one for the date and one for the close price (called Date and Price respecitvely). 
+## Installation
+Ensure that all required dependencies are installed in your Python virtual environment. You can install dependencies via the following command:
+```bash
+pip install -r requirements.txt
