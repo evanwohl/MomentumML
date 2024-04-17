@@ -40,3 +40,7 @@ Ensure that all required dependencies are installed in your Python virtual envir
     **date_to_test_from = 2015**
 - Directly under the initialization of these variables, replace the values inside the list that is being iterated over with the location to the csv files of your data. It should have two columns, one for the date and one for the close price (Date, and Price respecitvely)
 - Run **build_model.py**
+
+## License 
+
+This project is licensed under the MIT License - see the LICENSE file for details.
