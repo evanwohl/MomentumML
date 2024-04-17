@@ -107,7 +107,7 @@ def backtest_strategy(df, magnitude):
     :return: a number representing the final capital after backtesting the strategy
     """
     df['Date'] = pd.to_datetime(df['Date'])
-    df = df[(df['Date'].dt.year > 2014)]
+    df = df[(df['Date'].dt.year > date_to_test_from - 1)]
     df = df.sort_values(by='Date')
     capital = 10000
     value = [10000]
@@ -180,17 +180,6 @@ def plot_actual_vs_predicted(df):
     plt.grid(True)
     plt.show()
 
-def plot_heatmap(df):
-    """
-    Plot a heatmap of the correlation matrix of a dataframe
-    :param df: a pandas dataframe
-    :return: none
-    """
-    corr = df.corr()
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
-    plt.title('Heatmap of Correlation Matrix')
-    plt.show()
 def print_results(df_actual_vs_predicted, magnitude):
     """
     Print the results of the model's predictions
@@ -222,7 +211,6 @@ def print_results(df_actual_vs_predicted, magnitude):
     print(f"Backtest result: ${backtest_result} profit with magnitude {(magnitude)}")
     plot_distribution(df_actual_vs_predicted)
     plot_actual_vs_predicted(df_actual_vs_predicted)
-    plot_heatmap(df_actual_vs_predicted)
 
 def build_model(df):
     """
@@ -232,7 +220,7 @@ def build_model(df):
     """
     df = df.dropna(subset=['Change'])
     df['Date'] = pd.to_datetime(df['Date'])
-    df = df[(df['Date'].dt.year > 2009)]
+    df = df[(df['Date'].dt.year > date_to_train_from - 1)]
     print(df)
     X = df.drop(['Change', 'Date', 'Price'], axis=1)
     y = df['Change']
@@ -241,11 +229,12 @@ def build_model(df):
     y_pred = model.predict(X_test)
     df_actual_vs_predicted = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
     df_actual_vs_predicted['Date'] = df['Date'].iloc[-len(y_test):].values
-    magnitude = 1.3
     print_results(df_actual_vs_predicted, magnitude)
     with open('model.pkl', 'wb') as file:
         pickle.dump(model, file)
-    return model, X_test, y_test\
+    return model, X_test, y_test
+
+
 
 
 def build_lstm_model(df):
@@ -333,6 +322,9 @@ def prep_data(data):
 if __name__ == '__main__':
     data = []
     first_rows = []
+    date_to_train_from = 2010
+    date_to_test_from = 2015
+    magnitude = 1.3
     for file in ['nvda.csv', 'spy.csv', 'smci.csv', 'tsla.csv', 'aapl.csv', 'msft.csv', 'amd_data.csv', 'v.csv', 'abbv.csv', 'meta.csv', 'ma.csv', 'amzn.csv', 'goog.csv', 'orcl.csv', 'intc.csv', 'nflx.csv', 'adbe.csv']:
         print(prep_data(load_csv(file)).iloc[0])
         data.append(prep_data(load_csv(file)).iloc[1:])
@@ -350,7 +342,6 @@ if __name__ == '__main__':
     df_actual_vs_predicted = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
     print(df_actual_vs_predicted.to_string())
     df_actual_vs_predicted['Date'] = data['Date'].iloc[-len(y_test):].values
-    magnitude = 2
     print(f"Predicted magnitude greater than {str(magnitude)}. Number of times: ", len(df_actual_vs_predicted[abs(df_actual_vs_predicted['Predicted']) > magnitude]))
     print(df_actual_vs_predicted[abs(df_actual_vs_predicted['Predicted']) > magnitude].to_string())
     print(f"Predicted magnitude greater than {str(magnitude)} but signs are the same and actual is less than {str(magnitude)}")
