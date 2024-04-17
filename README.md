@@ -14,8 +14,6 @@ This repository contains a machine learning model using random forest regression
 (39938 rows of data used for training)
 - **Mean Squared Error**: 5.269296510425714
 - **Mean Absolute Error**: 1.4749345441781025
-- **Average Prediction Error**: 1.47%
-
 ## Actual % Change in Price vs Predicted % Change in Price
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/eed62714-6d34-48f1-8e36-2bab0d957eab)
 
@@ -34,7 +32,7 @@ Below are the visualizations of the portfolio values resulting from the backtest
 ## Usage
 Ensure that all required dependencies are installed in your Python virtual environment.
 
-- Set the following variables to the desired values in the **if name == '__main___'** conditional:
+- Set the following variables to the desired values in the main conditional:
 
     **date_to_train_from = 2010**
   
