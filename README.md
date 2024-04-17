@@ -7,7 +7,7 @@ This repository contains a machine learning model using random forest regression
 - **Algorithm**: Random Forest Regression
 - **Dataset**: Includes momentum indicators for 17 securities.
 - **Training Period**: Starts in 2010
-- **Testing Period**: Starts in 2014
+- **Testing Period**: Starts in 2015
 - **Data Split**: 70% training, 30% testing
 
 ## Model Performance
