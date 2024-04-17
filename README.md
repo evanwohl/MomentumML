@@ -1,5 +1,4 @@
-Our final project for STAT486: Market Models consisted of creating a machine learning model to predict day over day change in close price of various different securities. Originally, we attempted to create a LSTM neural network, however it proved to be ineffective due to issues with redundancy as momentum indicators inherently represent time series data. Thus, we 
-decided to create a random forest regression model and created/backtested a trading strategy based on the results produced. 
+Machine learning model to predict day over day change in close price of various different securities. A random forest regression model was trained over a dataset containing momentum indicatores for 17 seucurities, and a trading strategy was created/backtested based on the results produced. 
 
 **Model Mean Squared Error: 5.269296510425714**
 
