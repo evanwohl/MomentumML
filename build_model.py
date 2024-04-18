@@ -90,14 +90,18 @@ def create_random_forest_model(X_train, y_train, X_test, y_test):
     :param y_test: a pandas series with the target variable
     :return: a trained Random Forest model
     """
-    model = RandomForestRegressor(n_estimators=500)
+    model = RandomForestRegressor(n_estimators=300, n_jobs=-1, verbose=2, random_state=0)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     print(f"Mean Squared Error: {mse}")
     print(f"Mean Absolute Error: {mae}")
+    print(f"Model feature importance: {model.feature_importances_}")
+    print(f"Feature name vs importance: {list(zip(X_train.columns, model.feature_importances_))}")
     return model
+
+
 
 def backtest_strategy(df, magnitude):
     """
@@ -129,8 +133,8 @@ def backtest_strategy(df, magnitude):
     print(f"Average win: {sum(wins) / len(wins)}")
     print(f"Average loss: {sum(losses) / len(losses)}")
     print("Win Loss Ratio: ", len(wins) / len(losses))
-    print(f"Max Drawdown: {max([((value[i] - max(value[:i])) / max(value[:i])) for i in range(1, len(value))])}")
     return capital, value
+
 
 def plot_value_series(lst):
     """
@@ -224,7 +228,7 @@ def build_model(df):
     print(df)
     X = df.drop(['Change', 'Date', 'Price'], axis=1)
     y = df['Change']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=105, shuffle=False)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=110905, shuffle=False)
     model = create_random_forest_model(X_train, y_train, X_test, y_test)
     y_pred = model.predict(X_test)
     df_actual_vs_predicted = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
