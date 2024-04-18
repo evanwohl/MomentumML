@@ -12,21 +12,21 @@ This repository contains a machine learning model using random forest regression
 
 ## Model Performance
 (39938 rows of data used for training)
-- **Mean Squared Error**: 5.269296510425714
-- **Mean Absolute Error**: 1.4749345441781025
+- **Mean Squared Error**: 5.272332061904529
+- **Mean Absolute Error**: 1.4767322521351225
 ## Actual % Change in Price vs Predicted % Change in Price
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/eed62714-6d34-48f1-8e36-2bab0d957eab)
 
 ## Strategy Backtest Results
 The following metrics were obtained through backtesting the built-in trading strategy:
-- **Average Win**: $225.90
-- **Average Loss**: -$196.80
-- **Win/Loss Ratio**: 1.113
+- **Average Win**: $341.57
+- **Average Loss**: -$278.74
+- **Win/Loss Ratio**: 1.211
 
 ## Portfolio Valuation Plot
 Below are the visualizations of the portfolio values resulting from the backtested trading strategy:
 
-![Portfolio Value Plot](https://github.com/evanwohl/MomentumML/assets/156111794/d66c024f-a1e3-4991-a367-daf22ab5e6bf)
+![image](https://github.com/evanwohl/MomentumML/assets/156111794/2c0c2b0c-0169-4578-8ab1-1d0d51b1da56)
 
 
 ## Usage
