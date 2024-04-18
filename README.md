@@ -23,7 +23,6 @@ The following metrics were obtained through backtesting the built-in trading str
 - **Average Loss**: -$278.74
 - **Win/Loss Ratio**: 1.211
 
-## Portfolio Valuation Plot
 Below are the visualizations of the portfolio values resulting from the backtested trading strategy:
 
 ![image](https://github.com/evanwohl/MomentumML/assets/156111794/2c0c2b0c-0169-4578-8ab1-1d0d51b1da56)
